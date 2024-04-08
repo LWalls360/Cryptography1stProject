@@ -113,10 +113,15 @@
             });
 
             socket.connect();
+
+            socket.on("connect_error", function(){
+                alert("2 users are already connected!")
+            });
+            
             socket.on("connect", function() {
                 socket.emit("user_log_in", username);
-            });            
-
+            });
+            
             document.getElementById("login-user-input-boxes").style.display = "none";            
             document.getElementById("chat").style.display = "block";
         })
