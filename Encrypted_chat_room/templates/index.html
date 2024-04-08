@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypted chat room</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e5e5e5;
+        }
+
+        #chat {
+            width: 50%;
+        }
+
+        #chat input {
+            width: 99%;
+        }
+
+        ul {
+            height: 500px;
+            background-color: white;
+            overflow-y: scroll;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        #landing {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="landing">
+        <button id="new-user">NEW USER</button>
+        <button id="log-in-user">LOG IN</button>
+    </div>
+    
+    <div id="create-user-input-boxes" style="display:none;">
+        <input type="text" id="new-user-username" placeholder="New Username">
+        <input type="password" id="new-user-password" placeholder="New Password">
+        <button id="create-user">CREATE USER AND GENERATE KEYS</button>
+    </div>
+
+    <div id="login-user-input-boxes" style="display:none;">
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button id="log-in-user-to-chat">LOG INTO CHAT</button>
+    </div>  
+
+    <div id="chat" style="display:none;">
+        <ul id="chat-messages">
+        </ul>
+        <input type="text" id="message" placeholder="Enter a Message">
+    </div>
+    <script>
+        const socket = io({autoConnect: false});
+        const create_user_url = {{ url_for("main.create_user")|tojson }};
+        const log_in_user_url = {{ url_for("main.log_in_user")|tojson }};
+
+        document.getElementById("new-user").addEventListener("click", function() {            
+            document.getElementById("landing").style.display = "none";
+            document.getElementById("create-user-input-boxes").style.display = "block";
+        })
+
+        document.getElementById("log-in-user").addEventListener("click", function() {            
+            document.getElementById("landing").style.display = "none";
+            document.getElementById("login-user-input-boxes").style.display = "block";
+        })
+
+        document.getElementById("create-user").addEventListener("click", function() {
+            let username = document.getElementById("new-user-username").value;
+            let password = document.getElementById("new-user-password").value;
+
+            let data = {
+                "username": username,
+                "password": password,
+            }
+            fetch(create_user_url, {
+                "method": "POST",
+                "headers": { "Content-Type": "application/json" },
+                "body": JSON.stringify(data),
+            }).then(alert("User created successfully!"));
+
+            document.getElementById("create-user-input-boxes").style.display = "none";            
+            document.getElementById("landing").style.display = "block";
+        })
+        
+        document.getElementById("log-in-user-to-chat").addEventListener("click", function() {
+            let username = document.getElementById("login-username").value;
+            let password = document.getElementById("login-password").value;
+
+            let data = {
+                "username": username,
+                "password": password,
+            }
+            fetch(log_in_user_url, {
+                "method": "POST",
+                "headers": { "Content-Type": "application/json" },
+                "body": JSON.stringify(data),
+            });
+
+            socket.connect();
+            socket.on("connect", function() {
+                socket.emit("user_log_in", username);
+            });            
+
+            document.getElementById("login-user-input-boxes").style.display = "none";            
+            document.getElementById("chat").style.display = "block";
+        })
+
+        document.getElementById("message").addEventListener("keyup", function (event) {
+            if (event.key == "Enter") {
+                let message = document.getElementById("message").value;
+                socket.emit("new_message", message);
+                document.getElementById("message").value = "";
+            }
+        })
+
+        socket.on("chat", function(data) {
+            let ul = document.getElementById("chat-messages");
+            let li = document.createElement("li");
+            li.appendChild(document.createTextNode(data["username"] + ": " + data["message"]));
+            ul.appendChild(li);
+            li.scrollIntoView({behavior: "smooth"});
+        })
+    </script>
+</body>
+</html>
