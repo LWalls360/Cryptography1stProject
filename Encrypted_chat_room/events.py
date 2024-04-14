@@ -20,7 +20,7 @@ def handle_disconnect():
 def handle_user_join(username):
     print(f"User {username} joined!")
     users[request.sid] = username
-    emit("chat", {"message": f"User {username} logged into chat", "username": username}, broadcast=True)
+    emit("user_log_in_message", {"message": f"User {username} logged into chat", "username": username}, broadcast=True)
 
 @socketio.on("new_message")
 def handle_new_message(message):
