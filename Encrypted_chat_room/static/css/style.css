@@ -1,0 +1,37 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #726b6b87;
+    flex-direction: column;
+}
+
+#chat {
+    width: 70vw;
+}
+
+#login-user-input-boxes {
+    width: 60vw;
+}
+
+ul {
+    height: 500px;
+    background-color: white;
+    overflow-y: scroll;
+}
+
+li {
+    list-style: none;
+}
+
+#landing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    gap: 10px;
+}
+#page-title {
+    padding-bottom: 20vh;
+}
