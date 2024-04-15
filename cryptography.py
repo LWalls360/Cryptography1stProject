@@ -300,11 +300,14 @@ class CryptoUtils:
         keys = byte_file.getvalue()                                                  # creacion de un objeto bytesio
         bytes_to_string_keys = contents.decode('utf-8')
         lines = bytes_to_string_keys.split('\n')
+        decrypted_line = []
         for line in lines:
-            line=decrypted_private_key((line.encode('utf-8') + b'\n'),derived_key_hashr)
-
-
-
+            dec_line=decrypted_private_key((line.encode('utf-8') + b'\n'),derived_key_hash)
+            decrypted_line.append(dec_line)
+        
+        priv_asym_key = decrypted_line[0]
+        pub_asym_key = [1]
+        sym_key = decrypted_line[2]
                                                             #reseteo del puntero a la posición inicial 
-        return lines
+        return priv_asym_key, pub_asym_key, sym_key
 
