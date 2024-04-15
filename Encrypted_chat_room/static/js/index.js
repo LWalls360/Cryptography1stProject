@@ -1,6 +1,8 @@
 function main() {
+    const fileInput = document.querySelector("#keyfile-container input[type=file]");
     const socket = io({autoConnect: false});
     let username = "";
+    let filestr = "";
 
     document.getElementById("generate-keys").addEventListener("click", function() {            
         document.getElementById("page-title").style.display = "none";
@@ -26,8 +28,11 @@ function main() {
             "method": "POST",
             "headers": { "Content-Type": "application/json" },
             "body": JSON.stringify(data),
-        }).then(alert("User created successfully!"));
-
+        }).then( res => {return res.blob();
+        }).then(blob => { download(blob, "EncryptedUserKeys.keyfile")
+        }).then(alert("User created and keys generated successfully!"))
+        .catch(err=>console.log(err));
+        
         document.getElementById("create-user-input-boxes").style.display = "none";            
         document.getElementById("landing").style.display = "block";
         document.getElementById("page-title").style.display = "block";
@@ -36,36 +41,47 @@ function main() {
 
     document.getElementById("log-in-user-to-chat").addEventListener("click", function() {
         username = document.getElementById("login-username").value;
-        let private_sym_key = document.getElementById("private-sym-key").value;
-        let private_asym_key = document.getElementById("private-asym-key").value;
-        let public_asym_key = document.getElementById("public-asym-key").value;
+        let password = document.getElementById("login-password").value;
+        let reader = new FileReader();
+        reader.addEventListener("load", function (e) {
+            // Things to do after read as text finished
+            filestr = e.target.result;
 
-        let data = {
-            "username": username,
-            "private-sym-key": private_sym_key,
-            "private-asym-key": private_asym_key,
-            "public-asym-key": public_asym_key,
-        }
-        fetch(log_in_user_url, {
-            "method": "POST",
-            "headers": { "Content-Type": "application/json" },
-            "body": JSON.stringify(data),
+            let data = {
+                "username": username,
+                "password": password,
+                "keyfile": filestr,
+            }
+            fetch(log_in_user_url, {
+                "method": "POST",
+                "headers": { "Content-Type": "application/json" },
+                "body": JSON.stringify(data),
+            });
+    
+            socket.connect();
+    
+            socket.on("connect_error", function(){
+                alert("2 users are already connected!")
+            });
+            
+            socket.on("connect", function() {
+                socket.emit("user_log_in", username);
+            });
+            
+            document.getElementById("login-user-input-boxes").style.display = "none";            
+            document.getElementById("page-title").style.display = "none";            
+            document.getElementById("chat").style.display = "block";
         });
 
-        socket.connect();
-
-        socket.on("connect_error", function(){
-            alert("2 users are already connected!")
-        });
-        
-        socket.on("connect", function() {
-            socket.emit("user_log_in", username);
-        });
-        
-        document.getElementById("login-user-input-boxes").style.display = "none";            
-        document.getElementById("page-title").style.display = "none";            
-        document.getElementById("chat").style.display = "block";
+        reader.readAsText(fileInput.files[0]);
     })
+
+    fileInput.onchange = () => {
+        if (fileInput.files.length > 0) {
+            const fileName = document.querySelector("#keyfile-container .file-name");
+            fileName.textContent = fileInput.files[0].name;
+        }
+    };
 
     document.getElementById("message").addEventListener("keyup", function (event) {
         if (event.key == "Enter") {

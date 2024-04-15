@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
 </head>
 <body>
     <div id="page-title">
@@ -52,39 +53,24 @@
             </div>
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Private symmetric key</label>
+                    <label class="label">Password</label>
                 </div>
                 <div class="field-body">
                     <div class="field">
-                        <div class="control">
-                            <textarea class="textarea" id="private-sym-key" placeholder="Input your private symmetric key..."></textarea>
-                        </div>
+                        <p class="control is-expanded">
+                            <input class="input" type="password" id="login-password" placeholder="********">
+                        </p>
                     </div>
                 </div>
             </div>
-            <div class="field is-horizontal">
-                <div class="field-label is-normal">
-                    <label class="label">Private asymmetric key</label>
-                </div>
-                <div class="field-body">
-                    <div class="field">
-                        <div class="control">
-                            <textarea class="textarea" id="private-asym-key" placeholder="Input your private asymmetric key..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="field is-horizontal">
-                <div class="field-label is-normal">
-                    <label class="label">Public asymmetric key</label>
-                </div>
-                <div class="field-body">
-                    <div class="field">
-                        <div class="control">
-                            <textarea class="textarea" id="public-asym-key" placeholder="Input your public asymmetric key..."></textarea>
-                        </div>
-                    </div>
-                </div>
+            <div id="keyfile-container" class="file has-name is-right is-info">
+                <label class="file-label">
+                    <input class="file-input" type="file" name="keyfileee" accept=".keyfile"/>
+                    <span class="file-cta">
+                        <span class="file-label"> Choose a .keyfile file </span>
+                    </span>
+                    <span class="file-name"></span>
+                </label>
             </div>
             <div class="field is-horizontal">
                 <div class="field-label">
