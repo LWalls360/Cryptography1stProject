@@ -14,6 +14,7 @@ def create_user():
     print(f"New user: {request.json['username']}")
     privateAsymKey, publicAsymKey = CryptoUtils.generate_asymmetric_keys()
     privateSymKey = CryptoUtils.derive_symmetric_key(request.json['password'])
+    print(f"Keys: \n{privateSymKey}\n{privateAsymKey}\n {publicAsymKey}")
     keyFile = CryptoUtils.encrypt_keys_for_storage(request.json['username'],request.json['password'],privateAsymKey, publicAsymKey, privateSymKey)
     return send_file(keyFile, mimetype='text/plain', as_attachment=True, download_name="EncryptedUserKeys.keyfile")
 

@@ -70,6 +70,7 @@ class CryptoUtils:
         """
         f = Fernet(key)
         return f.encrypt(message.encode())
+    
     @staticmethod
     def decrypt_message(encrypted_message, key):
         f = Fernet(key)
@@ -245,9 +246,9 @@ class CryptoUtils:
         encrypted_file = BytesIO()                                                  # creacion de un objeto bytesio
         derived_key_string = username + password
         derived_key_hash = CryptoUtils.generate_hash(derived_key_string, 'sha256')              # obtencion del hash usando username y password
-        sym_key = CryptoUtils.encrypt_private_key(sym_key,derived_key_hash)                     # encripcion usando AES de las llaves
-        priv_asym_key = CryptoUtils.encrypt_private_key(priv_asym_key,derived_key_hash)
-        pub_asym_key = CryptoUtils.encrypt_private_key(pub_asym_key,derived_key_hash)
+        sym_key = CryptoUtils.encrypt_message(sym_key,derived_key_hash)                     # encripcion usando AES de las llaves
+        priv_asym_key = CryptoUtils.encrypt_message(priv_asym_key,derived_key_hash)
+        pub_asym_key = CryptoUtils.encrypt_message(pub_asym_key,derived_key_hash)
         encrypted_file.write(priv_asym_key)                                               ## escritura de las llaves cifradas en el objeto BytesIO
         encrypted_file.write(pub_asym_key)
         encrypted_file.write(sym_key)
@@ -263,11 +264,10 @@ class CryptoUtils:
         lines = bytes_to_string_keys.split('\n')
         decrypted_line = []
         for line in lines:
-            dec_line = CryptoUtils.decrypt_private_key((line.encode('utf-8') + b'\n'),derived_key_hash)
+            dec_line = CryptoUtils.decrypt_message((line.encode('utf-8') + b'\n'),derived_key_hash)
             decrypted_line.append(dec_line)
         
         priv_asym_key = decrypted_line[0]
         pub_asym_key = [1]
-        sym_key = decrypted_line[2]
-                                                            #reseteo del puntero a la posición inicial 
+        sym_key = decrypted_line[2]         #reseteo del puntero a la posición inicial 
         return priv_asym_key, pub_asym_key, sym_key
