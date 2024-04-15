@@ -280,18 +280,31 @@ class CryptoUtils:
     @staticmethod
     def encrypt_keys_for_storage(username, password, priv_asym_key, pub_asym_key, sym_key):
         
-        encrypted_file = BytesIO()                                                  ## creacion de un objeto bytesio
+        encrypted_file = BytesIO()                                                  # creacion de un objeto bytesio
         derived_key_string = username + password
-        derived_key_hash = generate_hash(derived_key_string, 'sha256')              ## obtencion del hash usando username y password
-        sym_key = encrypt_private_key(sym_key,derived_key_hash)                     ## encripcion usando AES de las llaves
+        derived_key_hash = generate_hash(derived_key_string, 'sha256')              # obtencion del hash usando username y password
+        sym_key = encrypt_private_key(sym_key,derived_key_hash)                     # encripcion usando AES de las llaves
         priv_asym_key = encrypt_private_key(PrivateFormat,derived_key_hash)
         pub_asym_key = encrypt_private_key(pub_asym_key,derived_key_hash)
         encrypted_file.write(priv_asym_key)                                               ## escritura de las llaves cifradas en el objeto BytesIO
         encrypted_file.write(pub_asym_key)
         encrypted_file.write(sym_key)
-        encrypted_file.seek(0)                                                      ## reseteo del puntero a la posición inicial 
+        encrypted_file.seek(0)                                                      # reseteo del puntero a la posición inicial 
         return encrypted_file
 
 
-    
+    @staticmethod
+    def decrypt_keys_from_storage(username, password, byte_file):
+        derived_key_string = username + password
+        derived_key_hash = generate_hash(derived_key_string, 'sha256')         
+        keys = byte_file.getvalue()                                                  # creacion de un objeto bytesio
+        bytes_to_string_keys = contents.decode('utf-8')
+        lines = bytes_to_string_keys.split('\n')
+        for line in lines:
+            line=decrypted_private_key((line.encode('utf-8') + b'\n'),derived_key_hashr)
+
+
+
+                                                            #reseteo del puntero a la posición inicial 
+        return lines
 
