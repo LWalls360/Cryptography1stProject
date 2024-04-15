@@ -35,7 +35,8 @@ class CryptoUtils:
         )
         return pem, public_key
 
-  """  @staticmethod
+    """
+    @staticmethod
     def encrypt_key(key, password):
         
         Cifra una clave privada con una contraseña.
@@ -153,7 +154,7 @@ class CryptoUtils:
             )
         )
     
-    return decrypted_symmetric_key
+        return decrypted_symmetric_key
 
     @staticmethod
     def generate_hash(message, algorithm='sha256'):
