@@ -55,6 +55,27 @@ class CryptoUtils:
             backend=default_backend()
         )
         return base64.urlsafe_b64encode(kdf.derive(password.encode()))
+    
+    @staticmethod
+    def derive_symmetric_key_for_storage(password):
+        """
+        Deriva una clave de cifrado simétrica de la contraseña + username del usuario 
+        con salt constante.
+        Args:
+            password (str): La contraseña del usuario.
+
+        Returns:
+            bytes: La clave de cifrado simétrica.
+        """
+        salt = b'\xcc)\xd6\xe8\xa2\x8b\xf5\xa9\x08\xdf\xdb:\xc8/*\x81'
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+            backend=default_backend()
+        )
+        return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
     @staticmethod
     def encrypt_message(message, key):
@@ -197,7 +218,7 @@ class CryptoUtils:
             return False
 
     @staticmethod
-    def encrypt_private_key(private_key, password):
+    def encrypt_private_key(private_key, sym_key):
         """
         Cifra una clave privada con una contraseña.
 
@@ -208,36 +229,16 @@ class CryptoUtils:
         Returns:
             bytes: La clave privada cifrada.
         """
-        salt = os.urandom(16)
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=100000,
-            backend=default_backend()
-        )
-        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
-        f = Fernet(key)
+        f = Fernet(sym_key)
         return f.encrypt(private_key)
 
     @staticmethod
-    def decrypt_private_key(encrypted_private_key, password):
-        # Derive the Fernet key from the password using PBKDF2
-        salt = encrypted_private_key[:16]  # Extract the salt from the ciphertext
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=100000,
-            backend=default_backend()
-        )
-        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
-    
+    def decrypt_private_key(encrypted_private_key, sym_key):
         # Initialize a Fernet cipher with the derived key
-        f = Fernet(key)
+        f = Fernet(sym_key)
     
         # Decrypt the encrypted private key
-        decrypted_private_key = f.decrypt(encrypted_private_key[16:])  # Exclude the salt
+        decrypted_private_key = f.decrypt(encrypted_private_key)
     
         return decrypted_private_key
 
@@ -245,10 +246,10 @@ class CryptoUtils:
     def encrypt_keys_for_storage(username, password, priv_asym_key, pub_asym_key, sym_key):        
         encrypted_file = BytesIO()                                                  # creacion de un objeto bytesio
         derived_key_string = username + password
-        derived_key_hash = CryptoUtils.generate_hash(derived_key_string, 'sha256')              # obtencion del hash usando username y password
-        sym_key = CryptoUtils.encrypt_message(sym_key,derived_key_hash)                     # encripcion usando AES de las llaves
-        priv_asym_key = CryptoUtils.encrypt_message(priv_asym_key,derived_key_hash)
-        pub_asym_key = CryptoUtils.encrypt_message(pub_asym_key,derived_key_hash)
+        sym_key_for_storage = CryptoUtils.derive_symmetric_key_for_storage(derived_key_string)
+        sym_key = CryptoUtils.encrypt_private_key(sym_key,sym_key_for_storage)                     # encripcion usando AES de las llaves
+        priv_asym_key = CryptoUtils.encrypt_private_key(priv_asym_key,sym_key_for_storage)
+        pub_asym_key = CryptoUtils.encrypt_private_key(pub_asym_key,sym_key_for_storage)
         encrypted_file.write(priv_asym_key)                                               ## escritura de las llaves cifradas en el objeto BytesIO
         encrypted_file.write(pub_asym_key)
         encrypted_file.write(sym_key)
@@ -257,14 +258,14 @@ class CryptoUtils:
 
     @staticmethod
     def decrypt_keys_from_storage(username, password, byte_file):
-        derived_key_string = username + password
-        derived_key_hash = CryptoUtils.generate_hash(derived_key_string, 'sha256')         
+        derived_key_string = username + password        
+        sym_key_for_storage = CryptoUtils.derive_symmetric_key_for_storage(derived_key_string)
         keys = byte_file.getvalue()                                                  # creacion de un objeto bytesio
         bytes_to_string_keys = keys.decode('utf-8')
         lines = bytes_to_string_keys.split('\n')
         decrypted_line = []
         for line in lines:
-            dec_line = CryptoUtils.decrypt_message((line.encode('utf-8') + b'\n'),derived_key_hash)
+            dec_line = CryptoUtils.decrypt_private_key((line.encode('utf-8') + b'\n'),sym_key_for_storage)
             decrypted_line.append(dec_line)
         
         priv_asym_key = decrypted_line[0]
