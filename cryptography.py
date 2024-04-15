@@ -302,7 +302,7 @@ class CryptoUtils:
         lines = bytes_to_string_keys.split('\n')
         decrypted_line = []
         for line in lines:
-            dec_line=decrypted_private_key((line.encode('utf-8') + b'\n'),derived_key_hash)
+            dec_line=decrypt_private_key((line.encode('utf-8') + b'\n'),derived_key_hash)
             decrypted_line.append(dec_line)
         
         priv_asym_key = decrypted_line[0]
