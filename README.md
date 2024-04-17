@@ -29,4 +29,4 @@ Para instalar y ejecutar la aplicación, sigue estos pasos sencillos:
    ```
    Al ejecutar este comando, el servidor web comenzará a escuchar en la dirección `127.0.0.1` en el puerto `5000`.
 
-3. **Acceso a la Aplicación**: Para acceder a la aplicación, abre un navegador web y visita `http://127.0.0.1:5000`. Aquí encontrarás la interfaz de usuario de la aplicación, donde podrás crear un usuario y luego iniciar sesión. Una vez autenticado, podrás acceder al chat.
+3. **Acceso a la Aplicación**: Para acceder a la aplicación, abre un navegador web y visita `https://127.0.0.1:5000`. Aquí encontrarás la interfaz de usuario de la aplicación, donde podrás crear un usuario y luego iniciar sesión. Una vez autenticado, podrás acceder al chat.
