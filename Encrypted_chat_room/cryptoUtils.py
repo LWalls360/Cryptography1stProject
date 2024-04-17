@@ -251,8 +251,11 @@ class CryptoUtils:
         priv_asym_key = CryptoUtils.encrypt_private_key(priv_asym_key,sym_key_for_storage)
         pub_asym_key = CryptoUtils.encrypt_private_key(pub_asym_key,sym_key_for_storage)
         encrypted_file.write(priv_asym_key)                                               ## escritura de las llaves cifradas en el objeto BytesIO
+        encrypted_file.write(b'\n')
         encrypted_file.write(pub_asym_key)
-        encrypted_file.write(sym_key)
+        encrypted_file.write(b'\n')
+        encrypted_file.write(sym_key )
+        encrypted_file.write(b'\n')
         encrypted_file.seek(0)                                                      # reseteo del puntero a la posición inicial 
         return encrypted_file
 
@@ -261,11 +264,11 @@ class CryptoUtils:
         derived_key_string = username + password        
         sym_key_for_storage = CryptoUtils.derive_symmetric_key_for_storage(derived_key_string)
         keys = byte_file.getvalue()                                                  # creacion de un objeto bytesio
-        bytes_to_string_keys = keys.decode('utf-8')
-        lines = bytes_to_string_keys.split('\n')
+        #bytes_to_keys = keys.decode('utf-8')
+        lines = keys.split(b'\n')
         decrypted_line = []
         for line in lines:
-            dec_line = CryptoUtils.decrypt_private_key((line.encode('utf-8') + b'\n'),sym_key_for_storage)
+            dec_line = CryptoUtils.decrypt_private_key((line,sym_key_for_storage)
             decrypted_line.append(dec_line)
         
         priv_asym_key = decrypted_line[0]
